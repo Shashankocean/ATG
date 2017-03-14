@@ -34,7 +34,7 @@ namespace Xamarin_LinkOS_Developer_Demo
     public class ReceiptDemoView : BaseDemoView
     {
         Button printBtn;
-        public string business_name, phone_number, asset_number, location;
+        public string business_name, phone_number, asset_number, location,date,due_date,date_time;
         Entry BusinessEntry, PhoneEntry, AssetEntry, LocationEntry;
         Label title;
         public ReceiptDemoView() : base()
@@ -51,49 +51,60 @@ namespace Xamarin_LinkOS_Developer_Demo
             Children.Add(PhoneEntry);
             Children.Add(AssetEntry);
             Children.Add(LocationEntry);
-
             Children.Add(title);
             Children.Add(printBtn);
         }
 
 		private void PrintBtn_Clicked(object sender, EventArgs e)
 		{
-            business_name = BusinessEntry.Text;
-            phone_number = PhoneEntry.Text;
-            asset_number = AssetEntry.Text;
-            location = LocationEntry.Text;
-            if (string.IsNullOrEmpty(business_name) && string.IsNullOrEmpty(phone_number) && string.IsNullOrEmpty(location) && string.IsNullOrEmpty(asset_number))
+            
+            DateTime datetime = DateTime.Now;
+            date_time = datetime.ToString();
+            if (string.IsNullOrEmpty(BusinessEntry.Text) && string.IsNullOrEmpty(PhoneEntry.Text) && string.IsNullOrEmpty(LocationEntry.Text) && string.IsNullOrEmpty(AssetEntry.Text))
             {
                     title.Text = "Some fields are blank";
             }
-            else if (asset_number.Length != 11)
+            else if (AssetEntry.Text.Length != 11)
             {
                 title.Text = "Asset number should be 11 digit";
             }
             else
             {
                 Regex regex = new Regex(@"^[0-9]+$");
-                if (regex.IsMatch(asset_number))
+                if (regex.IsMatch(AssetEntry.Text) && regex.IsMatch(PhoneEntry.Text))
                 {
-
-                    if (CheckPrinter())
-                    {
-                        printBtn.IsEnabled = false;
-                        new Task(new Action(() =>
-                        {
-                            PrintLineMode();
-                        })).Start();
-                    }
+                    
+                    business_data.db_connection.SaveBusinessAsync(new business_DB() { business_name = BusinessEntry.Text, location = LocationEntry.Text, phone_number = PhoneEntry.Text, asset_number = AssetEntry.Text, date = datetime.ToString("dd-MM-yyyy"), due_date = datetime.AddMonths(6).ToString("dd-MM-yyyy"), date_time = date_time });
+                    check_printer(BusinessEntry.Text,PhoneEntry.Text,AssetEntry.Text,LocationEntry.Text, datetime.ToString("dd-MM-yyyy"), datetime.AddMonths(6).ToString("dd-MM-yyyy"));
                 
                 }
                 else
                 {
-                    title.Text = "Enter numbers (asset)";
+                    title.Text = "Enter numbers (Asset & Phone number)";
                 }
                 
             }
 		}
+        public void check_printer(string businessname,string phonenumber,string assetnumber,string location,string date, string duedate)
+        {
+            business_name = businessname;
+            phone_number = phonenumber;
+            asset_number = assetnumber;
+            this.location = location;
+            this.date = date;
+            due_date = duedate;
+            title.Text = business_name + ":" + phone_number + ":" + asset_number + ":" + this.location + ":" + this.date + ":" + due_date;
+           // System.Diagnostics.Debug.WriteLine("print: "+businessname + "-" + phonenumber+"-"+assetnumber + "-" + this.location + "-" + this.date+duedate);
 
+            if (CheckPrinter())
+            {
+                printBtn.IsEnabled = false;
+                new Task(new Action(() =>
+                {
+                    PrintLineMode();
+                })).Start();
+            }
+        }
 		private void PrintLineMode()
         {
             IConnection connection = null;
@@ -134,6 +145,7 @@ namespace Xamarin_LinkOS_Developer_Demo
 
         private void sendZplReceipt(IConnection printerConnection)
         {
+
             /*
              This routine is provided to you as an example of how to create a variable length label with user specified data.
              The basic flow of the example is as follows
@@ -148,51 +160,38 @@ namespace Xamarin_LinkOS_Developer_Demo
 
              */
 
-String tmpHeader =
-        /*
-         Some basics of ZPL. Find more information here : http://www.zebra.com
-                  
-         ^XA indicates the beginning of a label
-         ^PW sets the width of the label (in dots)
-         ^MNN sets the printer in continuous mode (variable length receipts only make sense with variably sized labels)
-         ^LL sets the length of the label (we calculate this value at the end of the routine)
-         ^LH sets the reference axis for printing. 
-            You will notice we change this positioning of the 'Y' axis (length) as we build up the label. Once the positioning is changed, all new fields drawn on the label are rendered as if '0' is the new home position
-         ^FO sets the origin of the field relative to Label Home ^LH
-         ^A sets font information 
-         ^FD is a field description
-         ^GB is graphic boxes (or lines)
-         ^B sets barcode information
-         ^XZ indicates the end of a label
-         */
+            String tmpHeader =
+            /*
+             Some basics of ZPL. Find more information here : http://www.zebra.com
 
-        "^ XA~TA000~JSN ^ LT0 ^ MNW ^ MTD ^ PON ^ PMN ^ LH0,0 ^ JMA ^ PR5,5~SD10 ^ JUS ^ LRN ^ CI0 ^ XZ"+
-        "^ XA"+
-        "^ MMT"+
-        "^ PW422"+
-        "^ LL0269"+
-        "^ LS0"+
-        "^ BY2,2,160 ^ FT219,41 ^ BUR,,Y,N"+
-        "^ FD{0} ^ FS"+
-        "^ FT68,7 ^ A0R,17,16 ^ FH\\^ FDLocation:  ^ FS"+
-        "^ FT103,8 ^ A0R,17,16 ^ FH\\^ FDAsset: ^ FS"+
-        "^ FT137,8 ^ A0R,17,16 ^ FH\\^ FDPhone:^ FS"+
-        "^ FT172,8 ^ A0R,17,16 ^ FH\\^ FDBusiness: ^ FS"+
-        "^ FT66,85 ^ A0R,20,19 ^ FH\\^ FD{1} ^ FS"+
-        "^ FT100,59 ^ A0R,20,19 ^ FH\\^ FD{2} ^ FS"+
-        "^ FT169,79 ^ A0R,20,19 ^ FH\\^ FD{3} ^ FS"+
-        "^ FT134,59 ^ A0R,20,19 ^ FH\\^ FD{4} ^ FS"+
-        "^ PQ1,0,1,Y ^ XZ";
+             ^XA indicates the beginning of a label
+             ^PW sets the width of the label (in dots)
+             ^MNN sets the printer in continuous mode (variable length receipts only make sense with variably sized labels)
+             ^LL sets the length of the label (we calculate this value at the end of the routine)
+             ^LH sets the reference axis for printing. 
+                You will notice we change this positioning of the 'Y' axis (length) as we build up the label. Once the positioning is changed, all new fields drawn on the label are rendered as if '0' is the new home position
+             ^FO sets the origin of the field relative to Label Home ^LH
+             ^A sets font information 
+             ^FD is a field description
+             ^GB is graphic boxes (or lines)
+             ^B sets barcode information
+             ^XZ indicates the end of a label
+             */
 
+            //1// "^XA^MMT^PW422^LL0269^LS0^BY2,2,160^FT219,41^BUR,,Y,N^FD12345678987^FS^FO68,7^A0R,17,16^FDLocation:  ^FS^FO103,8^A0R,17,16^FDAsset: ^FS^FO137,8^A0R,17,16^FDPhone:^FS^FO172,8^A0R,17,16^FDBusiness: ^FS^FO66,85^A0R,20,19^FD{0}^FS^FO100,59^A0R,20,19^FD12345678910^FS^FO169,79^A0R,20,19^FDName of the business i^FS^FO134,59^A0R,20,19^FD123456789102^FS^PQ1,0,1,Y^XZ";
+            //dyn v1"^XA^MNN^PW422^LL0269^LH0,0^BY3,2,61^FT71,70^BUN,,Y,N^FD"+asset_number+"^FS^FO16,246^A0N,17,16^FDDue Date: ^FS^FO16,225^A0N,17,16^FDDate: ^FS^FO16,198^A0N,17,16^FDLocation:  ^FS^FO16,170^A0N,17,16^FDAsset: ^FS^FO16,140^A0N,17,16^FDPhone: ^FS^FO16,111^A0N,17,16^FDBusiness: ^FS^FO85,198^A0N,20,19^FD"+location+"^FS^FO60,170^A0N,20,19^FD"+asset_number+"^FS^FO80,111^A0N,20,19^FD"+business_name+"^FS^FO68,140^A0N,20,19^FD"+phone_number+"^FS^FO60,225^A0N,17,19^FD"+date+"^FS^FO81,246^A0N,17,16^FD"+due_date+"^FS^XZ";
+            //stat v1"^XA^MNN^PW422^LL0269^LH0,0^BY3,2,61^FT71,70^BUN,,Y,N^FD12345678987^FS^FO16,246^A0N,17,16^FDDue Date: ^FS^FO16,225^A0N,17,16^FDDate: ^FS^FO16,198^A0N,17,16^FDLocation:  ^FS^FO16,170^A0N,17,16^FDAsset: ^FS^FO16,140^A0N,17,16^FDPhone: ^FS^FO16,111^A0N,17,16^FDBusiness: ^FS^FO85,198^A0N,20,19^FDBangalore location^FS^FO60,170^A0N,20,19^FD12345678987^FS^FO80,111^A0N,20,19^FDName of the business i^FS^FO68,140^A0N,20,19^FD123456789102^FS^FO60,225^A0N,17,19^FDDate: ^FS^FO81,246^A0N,17,16^FDDue Date: ^FS^XZ";
+            "^XA^MNN^PW400^LL0216^LH0^BY1,2,77^FT221,59^BUR,,Y,N^FD"+asset_number+"^FS^FB210,1,0,C^FO342,0^A0R,24,24^FD"+business_name+"^FS^FB210,1,0,C^FO55,0^A0R,24,24^FDNext Due Date^FS^FB210,1,0,C^FO35,0^A0R,20,20^FD"+due_date+"^FS^FB210,1,0,C^FO115,0^A0R,24,24^FDTest Date^FS^FB210,1,0,C^FO95,0^A0R,20,20^FD"+date+"^FS^FB210,1,0,C^FO155,0^A0R,20,20^FD"+location+"^FS^FB210,1,0,C^FO175,0^A0R,24,24^FDLocation^FS^FB210,1,0,C^FO314,0^A0R,20,20^FD"+phone_number+"^FS^PQ1,0,1,Y^XZ";
+            // stat v2"^XA^MNN^PW422^LL0269^LH0,0^BY3,2,61^FT71,70^BUN,,Y,N^FD12345678987^FS^FO16,190^A0N,17,16^FDDate:  ^FS^FO235,190^A0N,17,16^FDDue Date:  ^FS^FO16,165^A0N,17,16^FDPhone: ^FS^FO245,165^A0N,19,16^FDAsset: ^FS^FO16,138^A0N,17,16^FDLocation: ^FS^FO16,111^A0N,17,16^FDBusiness: ^FS^FO50,189^A0N,20,19^FDDate^FS^FO300,189^A0N,20,19^FD31-03-2017^FS^FO62,164^A0N,20,19^FD92345678987^FS^FO285,165^A0N,20,19^FD12345678987^FS^FO80,110^A0N,20,19^FDName of the business i^FS^FO78,137^A0N,20,19^FDBangalore Location^FS^XZ";
             //int headerHeight = 325;
 
             ////DateTime date = new DateTime();
             ////string sdf = "yyyy/MM/dd";
             ////string dateString = date.ToString(sdf);
 
-            string header = string.Format(tmpHeader,asset_number, location,asset_number,business_name,phone_number);
+            // string header = string.Format(tmpHeader,asset_number, location,asset_number,business_name,phone_number);
 
-            printerConnection.Write(GetBytes(header));
+            printerConnection.Write(GetBytes(tmpHeader));
 
             //int heightOfOneLine = 40;
 

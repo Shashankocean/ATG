@@ -37,16 +37,20 @@ namespace Xamarin_LinkOS_Developer_Demo
             });
             //this.Children.Add(new ContentPage
             //{
-            //    Title = "Status Demo",
-            //    Content = new StatusDemoView()
+            //    Title = "new Print",
+            //    //    Content = new StatusDemoView()
+            //    Content = new ReprintView()
+
             //});
-           // this.Children.Add(new FormatDemoCarousel());
+
+           this.Children.Add(new ReprintView());
+           
+            // this.Children.Add(new FormatDemoCarousel());
             BaseDemoView.OnErrorAlert += BaseDemoView_OnErrorAlert;
             BaseDemoView.OnAboutChosen += BaseDemoView_OnAboutChosen;
             BaseDemoView.OnAlert += BaseDemoView_OnAlert;
         }
-
-        private void BaseDemoView_OnAboutChosen()
+             private void BaseDemoView_OnAboutChosen()
         {
             string message = "Developer Demo "  + App.APP_Version + " {" + App.GIT_APP_HASH + "}" + Environment.NewLine 
                 + "Using SDK " + App.API_Version +" {" + App.GIT_API_HASH +"}" + Environment.NewLine + "Copyright Zebra Technologies 2016";
