@@ -27,9 +27,8 @@ using Xamarin.Forms;
 
 namespace Xamarin_LinkOS_Developer_Demo
 {
-    public class BaseDemoView : StackLayout
+    public class BaseDemoView : ScrollView
     {
-
         public delegate void ChoosePrinterHandler();
         public static event ChoosePrinterHandler OnChoosePrinterChosen;
         public delegate void AboutPageHandler();
@@ -41,12 +40,18 @@ namespace Xamarin_LinkOS_Developer_Demo
 
         private Label printerLbl;
         protected IDiscoveredPrinter myPrinter;
+        public static IDiscoveredPrinter myPrinterG;
         protected Button backBtn;
-
+        public StackLayout stk;
         public BaseDemoView()
         {
-            printerLbl = new Label { Text = "No Printer Selected" };
+            BackgroundColor = Color.White;
+            stk = new StackLayout
+            {
+                Spacing = 25,
+            };
 
+            printerLbl = new Label { Text = "No Printer Selected",TextColor=Color.FromHex("#7b7c7c") };
             Button selectPrinterBtn = new Button
             {
                 Text = "Select Printer",
@@ -63,18 +68,19 @@ namespace Xamarin_LinkOS_Developer_Demo
 
             StackLayout topSection = new StackLayout
             {
-                VerticalOptions = LayoutOptions.Start,
-                HorizontalOptions = LayoutOptions.FillAndExpand,
+                //VerticalOptions = LayoutOptions.Start,
                 Orientation = StackOrientation.Horizontal,
 
                 //Children = { selectPrinterBtn, aboutBtn }
-                Children = { selectPrinterBtn}
-            };
+                Children = {selectPrinterBtn, printerLbl },
+        };
 
             SelectPrinterView.OnPrinterSelected += SelectPrinterView_OnPrinterSelected;
-            
-            Children.Add(printerLbl);
-            Children.Add(topSection);
+
+            //Content = topSection;
+            // Children.Add(topSection); //----scroll
+            stk.Children.Add(topSection);
+            Content = stk;
            
         }
 
@@ -105,9 +111,13 @@ namespace Xamarin_LinkOS_Developer_Demo
         {
             myPrinter = printer;
             printerLbl.Text = "Printer:" + printer.Address;
+            setglobel(printer);
         }
-
-        protected void ShowErrorAlert(string message)
+        public static void setglobel(IDiscoveredPrinter printer)
+        {
+            myPrinterG = printer;
+        }
+       protected void ShowErrorAlert(string message)
         {
             if (OnErrorAlert != null)
                 OnErrorAlert(message);

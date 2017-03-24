@@ -42,9 +42,10 @@ namespace Xamarin_LinkOS_Developer_Demo
             refreshBtn.Clicked += RefreshBtn_Clicked;
             refreshBtn.IsEnabled = true; 
 
-            Children.Add(refreshBtn);
-            Children.Add(printerStatusLbl);
-            Children.Add(causesLbl);
+            //Children.Add(refreshBtn);
+            //Children.Add(printerStatusLbl);
+            //Children.Add(causesLbl);
+            //---scroll
         }
 
         private void CheckStatus()

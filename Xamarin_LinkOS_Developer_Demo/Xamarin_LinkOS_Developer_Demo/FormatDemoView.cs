@@ -55,11 +55,11 @@ namespace Xamarin_LinkOS_Developer_Demo
             };
             formatLv.ItemSelected += FormatLv_ItemSelected;
 
-            Children.Add(title);
-            Children.Add(refreshBtn);
-            Children.Add(spinner);
-            Children.Add(formatLv);
-            //GetTemplates();
+            //Children.Add(title);
+            //Children.Add(refreshBtn);
+            //Children.Add(spinner);
+            //Children.Add(formatLv); //---scroll
+            GetTemplates();
         }
 
         private void RefreshBtn_Clicked(object sender, EventArgs e)

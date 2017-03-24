@@ -33,7 +33,8 @@ namespace Xamarin_LinkOS_Developer_Demo
 
         public App()
 		{
-			MainPage = new MainNavigation ();
+            MainPage = new MainNavigation() {BarBackgroundColor = Color.Green, BarTextColor=Color.White };
+            
 		}
 
         protected override void OnStart()

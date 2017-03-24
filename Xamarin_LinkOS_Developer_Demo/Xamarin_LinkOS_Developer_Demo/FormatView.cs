@@ -61,10 +61,10 @@ namespace Xamarin_LinkOS_Developer_Demo
 
 		private void ClearFormat()
 		{
-			Children.Clear ();
-			Children.Add(title);
-			Children.Add(spinner);
-		}
+            //Children.Clear();
+            //Children.Add(title);
+            //Children.Add(spinner);//--scroll
+        }
 
         private void GetAndShowFields()
         {
@@ -89,7 +89,7 @@ namespace Xamarin_LinkOS_Developer_Demo
 
                 printBtn = new Button { Text = "Print" };
                 printBtn.Clicked += PrintBtn_Clicked;
-                Children.Add(printBtn);
+                //Children.Add(printBtn); //--scroll
                 resetPage();
             });
         }
@@ -107,7 +107,7 @@ namespace Xamarin_LinkOS_Developer_Demo
                 Orientation = StackOrientation.Horizontal,
                 Children = { fieldLbl, fieldEntry }
             };
-            Children.Add(formCell);
+           //Children.Add(formCell);
         }
 
         private void PrintBtn_Clicked(object sender, EventArgs e)
@@ -137,15 +137,15 @@ namespace Xamarin_LinkOS_Developer_Demo
 
                 Dictionary<int, string> vars = new Dictionary<int, string>();
 
-                foreach(View item in Children)
-                {
-                    if (item is StackLayout)
-                    {
-                        foreach(View formItem in ((StackLayout)item).Children)
-                            if (formItem is Entry)
-                                vars.Add(Convert.ToInt32(formItem.ClassId), ((Entry)formItem).Text);
-                    } 
-                }
+                //foreach (View item in Children)
+                //{
+                //    if (item is StackLayout)
+                //    {
+                //        foreach (View formItem in ((StackLayout)item).Children)
+                //            if (formItem is Entry)
+                //                vars.Add(Convert.ToInt32(formItem.ClassId), ((Entry)formItem).Text);
+                //    }
+                //}
 
                 // Send a format that is on the device to the printer
                 if (_format.FileLocation == Format.Location.device)

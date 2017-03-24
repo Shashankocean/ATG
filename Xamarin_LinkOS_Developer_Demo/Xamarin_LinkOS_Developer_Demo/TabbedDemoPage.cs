@@ -29,10 +29,12 @@ namespace Xamarin_LinkOS_Developer_Demo
     {
         public TabbedDemoPage()
         {
-            this.Title = "ATG";
+            this.Title = "  ATG";
             this.Children.Add(new ContentPage
             {
                 Title = "Create New",
+                Icon = "Barcode.png",
+                BackgroundColor = Color.White,
                 Content = new ReceiptDemoView()
             });
             //this.Children.Add(new ContentPage

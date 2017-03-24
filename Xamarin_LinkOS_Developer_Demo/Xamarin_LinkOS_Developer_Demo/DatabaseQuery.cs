@@ -20,7 +20,16 @@ namespace Xamarin_LinkOS_Developer_Demo
         public Task<List<business_DB>> get_business_data()
         {
             connection.Table<business_DB>();
-            return connection.QueryAsync<business_DB>("select * from business_DB ORDER BY date_time DESC limit 5");
+            return connection.QueryAsync<business_DB>("select * from business_DB ORDER BY date_time DESC limit 50");
+        }
+        public Task<List<business_DB>> get_asset()
+        {
+            connection.Table<business_DB>();
+            return connection.QueryAsync<business_DB>("select * from business_DB ORDER BY date_time DESC limit 1");
+        }
+        public Task<List<business_DB>> check_asset(string asset)
+        {
+            return connection.QueryAsync<business_DB>("select * from business_DB where asset_number='"+asset+"'");
         }
         public Task<int> SaveBusinessAsync(business_DB item)
         {

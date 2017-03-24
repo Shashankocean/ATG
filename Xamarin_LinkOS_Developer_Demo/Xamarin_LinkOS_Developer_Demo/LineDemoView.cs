@@ -39,28 +39,92 @@ namespace Xamarin_LinkOS_Developer_Demo
         Label title;
         public ReceiptDemoView() : base()
         {
-            title = new Label { Text = "Receipt" };
-            printBtn = new Button { Text = "Print" };
+            
+            
+            var buttonStyle = new Style(typeof(Button))
+            {
+                Setters = {
+
+                new Setter { Property = Button.TextColorProperty,   Value = Color.White },
+                new Setter { Property = Button.WidthRequestProperty, Value=200 },
+                new Setter { Property = Button.BorderRadiusProperty,   Value = 20 },
+                new Setter { Property = Button.HorizontalOptionsProperty,   Value = LayoutOptions.Center },
+                new Setter { Property = Button.BackgroundColorProperty,   Value = Color.FromHex("#03bc00") },
+                new Setter { Property = Button.BorderColorProperty,   Value = Color.Lime }
+            }
+            };
+
+            title = new Label { Text = " ",TextColor=Color.Red };
+            printBtn = new Button { Text = "Print", Style =buttonStyle };
             printBtn.Clicked += PrintBtn_Clicked;
 
-            BusinessEntry = new Entry { Placeholder = "Business name" };
-            PhoneEntry = new Entry { Placeholder = "Phone number" };
-            AssetEntry = new Entry { Placeholder = "Asset number" };
-            LocationEntry = new Entry { Placeholder = "Location" };
-            Children.Add(BusinessEntry);
-            Children.Add(PhoneEntry);
-            Children.Add(AssetEntry);
-            Children.Add(LocationEntry);
-            Children.Add(title);
-            Children.Add(printBtn);
+            BusinessEntry = new Entry { Placeholder = "Business name", TextColor = Color.FromHex("#0a0a0a"),PlaceholderColor=Color.FromHex("#7b7c7c"),BackgroundColor= Color.FromHex("#f2f2f2") };
+            var BusinessEntry2 = new Label {Text="" };
+            PhoneEntry = new Entry { Placeholder = "Phone number", Keyboard = Keyboard.Numeric, TextColor=Color.FromHex("#0a0a0a"), PlaceholderColor = Color.FromHex("#7b7c7c"), BackgroundColor = Color.FromHex("#f2f2f2") };
+            AssetEntry = new Entry { Placeholder = "Asset number", Keyboard= Keyboard.Numeric, TextColor = Color.FromHex("#0a0a0a"), PlaceholderColor = Color.FromHex("#7b7c7c"), BackgroundColor = Color.FromHex("#f2f2f2") };
+            AssetEntry.Focused += AssetEntry_Focused;
+            LocationEntry = new Entry { Placeholder = "Location", TextColor = Color.FromHex("#0a0a0a"), PlaceholderColor = Color.FromHex("#7b7c7c"), BackgroundColor = Color.FromHex("#f2f2f2") };
+
+            //StackLayout stk = new StackLayout {
+            //    Spacing=25,
+            //};
+            //stk.Children.Add(BusinessEntry2);
+            //stk.Children.Add(BusinessEntry);
+            //stk.Children.Add(PhoneEntry);
+            //stk.Children.Add(AssetEntry);
+            //stk.Children.Add(LocationEntry);
+            //stk.Children.Add(title);
+            //stk.Children.Add(printBtn);
+            //Content = stk;
+            base.stk.Children.Add(BusinessEntry);
+            base.stk.Children.Add(PhoneEntry);
+            base.stk.Children.Add(AssetEntry);
+            base.stk.Children.Add(LocationEntry);
+            base.stk.Children.Add(title);
+            base.stk.Children.Add(printBtn);
+            base.stk.Children.Add(BusinessEntry2);
+
+
         }
 
-		private void PrintBtn_Clicked(object sender, EventArgs e)
+        private async void AssetEntry_Focused(object sender, FocusEventArgs e)
+        {
+           
+            List<business_DB> list = await business_data.db_connection.get_asset();
+            if (list.Count !=0)
+            {
+                business_DB business = list[0];
+                long asset = Int64.Parse(business.asset_number);
+                ++asset;
+                AssetEntry.Text = leftPadding(asset.ToString());
+            }
+            else
+            {
+                AssetEntry.Text = "00000000001";
+            }
+        }
+        public string leftPadding(string s1)
+        {
+            try
+            {
+                int length = s1.Length;
+                for (int i = length; i < 11; i++)
+                {
+                    s1 = "0" + s1;
+                }
+                return s1;
+            }
+            catch (Exception ex)
+            {
+                return " " + ex.Message;
+            }
+        }
+        private async void PrintBtn_Clicked(object sender, EventArgs e)
 		{
-            
+           
             DateTime datetime = DateTime.Now;
             date_time = datetime.ToString();
-            if (string.IsNullOrEmpty(BusinessEntry.Text) && string.IsNullOrEmpty(PhoneEntry.Text) && string.IsNullOrEmpty(LocationEntry.Text) && string.IsNullOrEmpty(AssetEntry.Text))
+            if (string.IsNullOrEmpty(BusinessEntry.Text) || string.IsNullOrEmpty(PhoneEntry.Text) || string.IsNullOrEmpty(LocationEntry.Text) || string.IsNullOrEmpty(AssetEntry.Text))
             {
                     title.Text = "Some fields are blank";
             }
@@ -73,29 +137,47 @@ namespace Xamarin_LinkOS_Developer_Demo
                 Regex regex = new Regex(@"^[0-9]+$");
                 if (regex.IsMatch(AssetEntry.Text) && regex.IsMatch(PhoneEntry.Text))
                 {
-                    
-                    business_data.db_connection.SaveBusinessAsync(new business_DB() { business_name = BusinessEntry.Text, location = LocationEntry.Text, phone_number = PhoneEntry.Text, asset_number = AssetEntry.Text, date = datetime.ToString("dd-MM-yyyy"), due_date = datetime.AddMonths(6).ToString("dd-MM-yyyy"), date_time = date_time });
-                    check_printer(BusinessEntry.Text,PhoneEntry.Text,AssetEntry.Text,LocationEntry.Text, datetime.ToString("dd-MM-yyyy"), datetime.AddMonths(6).ToString("dd-MM-yyyy"));
-                
+                    //ReprintView rp = new ReprintView();
+                    //if (!await rp.DisplayAlert("Conform", "Are you sure you want to print?", "Yes", "No"))
+                    //{
+                    //    return;
+                    //}
+                    if (myprinterG())
+                    {
+                        await business_data.db_connection.SaveBusinessAsync(new business_DB() { business_name = BusinessEntry.Text, location = LocationEntry.Text, phone_number = PhoneEntry.Text, asset_number = AssetEntry.Text, date = datetime.ToString("dd-MM-yyyy"), due_date = datetime.AddMonths(6).ToString("dd-MM-yyyy"), date_time = date_time });
+                        check_printer(BusinessEntry.Text, PhoneEntry.Text, AssetEntry.Text, LocationEntry.Text, datetime.ToString("dd-MM-yyyy"), datetime.AddMonths(6).ToString("dd-MM-yyyy"));
+                    }
                 }
                 else
                 {
                     title.Text = "Enter numbers (Asset & Phone number)";
-                }
-                
+                }   
             }
 		}
+        public bool myprinterG()
+        {
+            if (myPrinterG == null)
+            {
+                ShowAlert("No printer selected", "Printer");
+                return false;
+            }
+            return true;
+        }
         public void check_printer(string businessname,string phonenumber,string assetnumber,string location,string date, string duedate)
         {
+           
+            if (myPrinterG !=null)
+            {
+                myPrinter = myPrinterG;
+            }
             business_name = businessname;
             phone_number = phonenumber;
             asset_number = assetnumber;
             this.location = location;
             this.date = date;
             due_date = duedate;
-            title.Text = business_name + ":" + phone_number + ":" + asset_number + ":" + this.location + ":" + this.date + ":" + due_date;
-           // System.Diagnostics.Debug.WriteLine("print: "+businessname + "-" + phonenumber+"-"+assetnumber + "-" + this.location + "-" + this.date+duedate);
-
+           //title.Text = business_name + ":" + phone_number + ":" + asset_number + ":" + this.location + ":" + this.date + ":" + due_date;
+           
             if (CheckPrinter())
             {
                 printBtn.IsEnabled = false;
@@ -104,6 +186,11 @@ namespace Xamarin_LinkOS_Developer_Demo
                     PrintLineMode();
                 })).Start();
             }
+            title.Text = " ";
+            BusinessEntry.Text = "";
+            AssetEntry.Text = "";
+            PhoneEntry.Text = "";
+            LocationEntry.Text = "";
         }
 		private void PrintLineMode()
         {

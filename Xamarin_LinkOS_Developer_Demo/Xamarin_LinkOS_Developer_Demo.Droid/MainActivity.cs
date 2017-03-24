@@ -23,7 +23,6 @@ namespace Xamarin_LinkOS_Developer_Demo.Droid
             myActivity = this;
             global::Xamarin.Forms.Forms.Init(this, bundle);
             LoadApplication(new App());
-           
         }
 
         public static Activity GetActivity()

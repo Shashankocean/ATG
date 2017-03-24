@@ -57,7 +57,7 @@ namespace Xamarin_LinkOS_Developer_Demo
         public SelectPrinterView()
         {
             Title = "Select a printer";
-
+            BackgroundColor = Color.White;
             printerList = new ObservableCollection<IDiscoveredPrinter>();
 
             printerLv = new ListView
@@ -67,10 +67,11 @@ namespace Xamarin_LinkOS_Developer_Demo
                 {
                     Label addressLbl = new Label();
                     addressLbl.SetBinding(Label.TextProperty, "Address");
+                    addressLbl.SetValue(Label.TextColorProperty, Color.FromHex("#545454"));
 
                     Label friendlyLbl = new Label();
                     friendlyLbl.SetBinding(Label.TextProperty, "FriendlyName");
-
+                    friendlyLbl.SetValue(Label.TextColorProperty, "#0051bc");
                     return new ViewCell
                     {
                         View = new StackLayout
@@ -83,25 +84,26 @@ namespace Xamarin_LinkOS_Developer_Demo
             };
             printerLv.ItemSelected += PrinterLv_ItemSelected;
 
-            Button backBtn = new Button
-            {
-                Text = "Back",
-                HorizontalOptions = LayoutOptions.Start
-            };
-            backBtn.Clicked += BackBtn_Clicked;
+            //Button backBtn = new Button
+            //{
+            //    Text = "Back",
+            //    HorizontalOptions = LayoutOptions.Start
+            //};
+            //backBtn.Clicked += BackBtn_Clicked;
 
             statusLbl = new Label
             {
-                Text = "Discovering Printers..."
+                Text = "Discovering Printers...",
+                TextColor = Color.FromHex("#545454"),
             };
 
             StackLayout topSection = new StackLayout
             {
-                VerticalOptions = LayoutOptions.Start,
-                HorizontalOptions = LayoutOptions.FillAndExpand,
+                VerticalOptions = LayoutOptions.Center,
+                HorizontalOptions = LayoutOptions.Center,
                 Orientation = StackOrientation.Horizontal,
 
-                Children = { backBtn, statusLbl }
+                Children = { statusLbl }
             };
 
             this.Content = new StackLayout
